@@ -1,8 +1,8 @@
 package com.example.sleeptracker.sleeptracker
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
@@ -19,44 +19,61 @@ class SleepTrackerViewModel(private val dataSource: SleepDatabaseDao, applicatio
         formatNights(it, application.resources)
     }
 
-    private val currentSleepNight = MutableLiveData<SleepNight?>()
+    private val _eventStopSleepTracking = MutableLiveData<Boolean>()
+    val eventStopSleepTracking: LiveData<Boolean> get() = _eventStopSleepTracking
+
+    private val activeSleepNight = MutableLiveData<SleepNight?>()
+
+    val startButtonVisible = activeSleepNight.map {
+        null == it
+    }
+    val stopButtonVisible = activeSleepNight.map {
+        null != it
+    }
+    val clearButtonVisible = sleepNightsList.map {
+        it.isNotEmpty()
+    }
+
     init {
         viewModelScope.launch {
-            currentSleepNight.value = dataSource.getTonightSleepData()
+            activeSleepNight.value = getActiveSleepNight()
         }
+        _eventStopSleepTracking.value = false
+    }
+
+    private suspend fun getActiveSleepNight(): SleepNight? {
+        var night = dataSource.getTonightSleepData()
+        if (night?.endTimeInMillis != night?.startTimeInMillis) {
+            night = null
+        }
+        return night
     }
 
     fun onStartTracking() {
         viewModelScope.launch {
-
-            Log.i("SleepTracking", "sleepID = ${currentSleepNight.value?.nightId} ----> current.endtime = ${currentSleepNight.value?.endTimeInMillis} && systemTime = ${System.currentTimeMillis()}")
-            if (currentSleepNight.value != null && currentSleepNight.value?.endTimeInMillis == currentSleepNight.value?.startTimeInMillis) {
-                Log.i("SleepTracking", "One SleepTracker is already running!")
-                return@launch
-            }
             val sleepNight = SleepNight()
             dataSource.insert(sleepNight)
-            currentSleepNight.value = dataSource.getTonightSleepData()
+            activeSleepNight.value = getActiveSleepNight()
         }
     }
 
-
     fun onStopTracking() {
         viewModelScope.launch {
-            val lastSleepNight = currentSleepNight.value
-            if (lastSleepNight == null || lastSleepNight.startTimeInMillis != lastSleepNight.endTimeInMillis) {
-                Log.i("SleepTracking", "No Active SleepTracker running !")
-                return@launch
-            }
-            lastSleepNight.endTimeInMillis = System.currentTimeMillis()
-            dataSource.update(lastSleepNight)
+            val sleepNight = activeSleepNight.value ?: return@launch
+            sleepNight.endTimeInMillis = System.currentTimeMillis()
+            dataSource.update(sleepNight)
+            _eventStopSleepTracking.value = true
         }
+    }
+
+    fun onStopTrackingComplete() {
+        _eventStopSleepTracking.value = false
     }
 
     fun onClearClick() {
         viewModelScope.launch {
             dataSource.clear()
-            currentSleepNight.value = null
+            activeSleepNight.value = null
         }
     }
 }

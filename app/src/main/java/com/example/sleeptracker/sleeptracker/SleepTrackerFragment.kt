@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.sleeptracker.R
 import com.example.sleeptracker.database.SleepDatabase
 import com.example.sleeptracker.databinding.FragmentSleepTrackerBinding
@@ -23,6 +24,17 @@ class SleepTrackerFragment : Fragment() {
         binding.sleepTrackerViewModel = sleepTrackerViewModel
         binding.lifecycleOwner = this
 
+        sleepTrackerViewModel.eventStopSleepTracking.observe(viewLifecycleOwner) { hasStopClicked ->
+            if (hasStopClicked) {
+                handleStopClick()
+                sleepTrackerViewModel.onStopTrackingComplete()
+            }
+        }
+
         return binding.root
+    }
+
+    private fun handleStopClick() {
+        findNavController().navigate(R.id.action_sleepTrackerFragment_to_sleepQualityFragment2)
     }
 }
