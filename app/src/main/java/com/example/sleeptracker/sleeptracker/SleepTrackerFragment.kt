@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.sleeptracker.R
 import com.example.sleeptracker.database.SleepDatabase
 import com.example.sleeptracker.databinding.FragmentSleepTrackerBinding
+import com.example.sleeptracker.recyclerview.SleepNightAdapter
 
 class SleepTrackerFragment : Fragment() {
 
@@ -23,6 +24,14 @@ class SleepTrackerFragment : Fragment() {
         val sleepTrackerViewModel = ViewModelProvider(this, sleepTrackerViewModelFactory).get(SleepTrackerViewModel::class.java)
         binding.sleepTrackerViewModel = sleepTrackerViewModel
         binding.lifecycleOwner = this
+
+        val adapter = SleepNightAdapter()
+        binding.sleepList.adapter = adapter
+        sleepTrackerViewModel.sleepNightsList.observe(viewLifecycleOwner) {
+            it?.let {
+                adapter.data = it
+            }
+        }
 
         sleepTrackerViewModel.eventStopSleepTracking.observe(viewLifecycleOwner) { hasStopClicked ->
             if (hasStopClicked) {

@@ -1,11 +1,18 @@
 package com.example.sleeptracker.recyclerview
 
+import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sleeptracker.R
 import com.example.sleeptracker.database.SleepNight
 
 class SleepNightAdapter: RecyclerView.Adapter<TextItemViewHolder>() {
-    private var data =  listOf<SleepNight>()
+     var data =  listOf<SleepNight>()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun getItemCount(): Int = data.size
 
@@ -15,7 +22,9 @@ class SleepNightAdapter: RecyclerView.Adapter<TextItemViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextItemViewHolder {
-        return TODO("Provide the return value")
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val view = layoutInflater.inflate(R.layout.text_item_view, parent, false) as TextView
+        return TextItemViewHolder(view)
     }
 
 }

@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class SleepTrackerViewModel(private val dataSource: SleepDatabaseDao, application: Application): AndroidViewModel(application) {
 
-    private val sleepNightsList = dataSource.getAllSleepNights()
+    val sleepNightsList = dataSource.getAllSleepNights()
     val sleepNightsDataString = sleepNightsList.map {
         formatNights(it, application.resources)
     }
