@@ -33,17 +33,13 @@ class SleepTrackerFragment : Fragment() {
             }
         }
 
-        sleepTrackerViewModel.eventStopSleepTracking.observe(viewLifecycleOwner) { hasStopClicked ->
-            if (hasStopClicked) {
-                handleStopClick()
+        sleepTrackerViewModel.eventStopSleepTracking.observe(viewLifecycleOwner) { nightId ->
+            if (nightId != -1L) {
+                findNavController().navigate(SleepTrackerFragmentDirections.actionSleepTrackerFragmentToSleepQualityFragment2(nightId))
                 sleepTrackerViewModel.onStopTrackingComplete()
             }
         }
 
         return binding.root
-    }
-
-    private fun handleStopClick() {
-        findNavController().navigate(R.id.action_sleepTrackerFragment_to_sleepQualityFragment2)
     }
 }

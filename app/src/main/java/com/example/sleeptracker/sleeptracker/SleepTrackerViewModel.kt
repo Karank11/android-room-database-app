@@ -15,12 +15,12 @@ import kotlinx.coroutines.launch
 class SleepTrackerViewModel(private val dataSource: SleepDatabaseDao, application: Application): AndroidViewModel(application) {
 
     val sleepNightsList = dataSource.getAllSleepNights()
-    val sleepNightsDataString = sleepNightsList.map {
-        formatNights(it, application.resources)
-    }
+//    val sleepNightsDataString = sleepNightsList.map {
+//        formatNights(it, application.resources)
+//    }
 
-    private val _eventStopSleepTracking = MutableLiveData<Boolean>()
-    val eventStopSleepTracking: LiveData<Boolean> get() = _eventStopSleepTracking
+    private val _eventStopSleepTracking = MutableLiveData<Long>()
+    val eventStopSleepTracking: LiveData<Long> get() = _eventStopSleepTracking
 
     private val activeSleepNight = MutableLiveData<SleepNight?>()
 
@@ -38,7 +38,11 @@ class SleepTrackerViewModel(private val dataSource: SleepDatabaseDao, applicatio
         viewModelScope.launch {
             activeSleepNight.value = getActiveSleepNight()
         }
-        _eventStopSleepTracking.value = false
+
+        _eventStopSleepTracking.value = -1L
+        activeSleepNight.value?.let {
+            _eventStopSleepTracking.value = it.nightId
+        }
     }
 
     private suspend fun getActiveSleepNight(): SleepNight? {
@@ -62,12 +66,12 @@ class SleepTrackerViewModel(private val dataSource: SleepDatabaseDao, applicatio
             val sleepNight = activeSleepNight.value ?: return@launch
             sleepNight.endTimeInMillis = System.currentTimeMillis()
             dataSource.update(sleepNight)
-            _eventStopSleepTracking.value = true
+            _eventStopSleepTracking.value = sleepNight.nightId
         }
     }
 
     fun onStopTrackingComplete() {
-        _eventStopSleepTracking.value = false
+        _eventStopSleepTracking.value = -1L
     }
 
     fun onClearClick() {
