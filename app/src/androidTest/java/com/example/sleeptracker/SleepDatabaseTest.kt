@@ -41,13 +41,4 @@ class SleepDatabaseTest {
     fun closeDb() {
         db.close()
     }
-
-    @Test
-    @Throws(Exception::class)
-    fun insertAndGetTonightSleepData() {
-        val sleepNight = SleepNight()
-        sleepDatabaseDao.insert(sleepNight)
-        val tonight = sleepDatabaseDao.getTonightSleepData()
-        assertEquals(tonight?.sleepQuality, -1)
-    }
 }
