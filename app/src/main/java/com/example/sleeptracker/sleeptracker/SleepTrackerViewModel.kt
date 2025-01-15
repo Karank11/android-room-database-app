@@ -8,16 +8,12 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.sleeptracker.database.SleepDatabaseDao
 import com.example.sleeptracker.database.SleepNight
-import com.example.sleeptracker.formatNights
 import kotlinx.coroutines.launch
 
 
 class SleepTrackerViewModel(private val dataSource: SleepDatabaseDao, application: Application): AndroidViewModel(application) {
 
     val sleepNightsList = dataSource.getAllSleepNights()
-//    val sleepNightsDataString = sleepNightsList.map {
-//        formatNights(it, application.resources)
-//    }
 
     private val _eventStopSleepTracking = MutableLiveData<Long>()
     val eventStopSleepTracking: LiveData<Long> get() = _eventStopSleepTracking
